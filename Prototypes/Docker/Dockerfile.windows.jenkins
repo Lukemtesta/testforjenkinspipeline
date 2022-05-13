@@ -1,0 +1,17 @@
+#指定基礎 os image
+FROM microsoft/windowsservercore
+
+#將 jenkins 安裝檔複製到 container 中
+ADD ./setup c:/jenkins
+
+#安裝 jenkins
+RUN ["msiexec.exe", "/i", "C:\\jenkins\\jenkins.msi", "/qn"]
+
+#移除 container 中的安裝檔(讓 image 保持乾淨)
+RUN Powershell.exe -Command remove-item c:/jenkins -Recurse
+
+#對外使用 8080 port
+EXPOSE 8080  
+
+#如果有 slave 需加上 50000 port
+EXPOSE 50000

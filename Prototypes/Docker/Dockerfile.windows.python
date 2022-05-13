@@ -1,0 +1,31 @@
+# escape=`
+# Copyright (C) Microsoft Corporation. All rights reserved.
+
+# Referenced from: https://devblogs.microsoft.com/setup/no-container-image-for-build-tools-for-visual-studio-2017/
+
+# Switch the docker daemon to Windows containers 
+ARG FROM_IMAGE=mcr.microsoft.com/dotnet/framework/sdk:4.8-windowsservercore-1803
+FROM ${FROM_IMAGE}
+
+# Reset the shell.
+SHELL ["cmd", "/S", "/C"]
+
+# Install 7zip 
+ADD https://www.7-zip.org/a/7z2107-x64.msi C:\TEMP\7z2107-x64.msi
+RUN start /wait msiexec.exe -i C:\TEMP\7z2107-x64.msi INSTALLDIR="C:\TEMP\7zip" /quiet /L*v "C:\TEMP\7zip.log"
+
+# Install Python 3.8: https://docs.python.org/3.6/using/windows.html#installing-without-ui
+ADD https://www.python.org/ftp/python/3.8.8/python-3.8.8-amd64.exe C:\TEMP\python-3.8.8-amd64.exe
+RUN C:\TEMP\python-3.8.8-amd64.exe /passive /quiet InstallAllUsers=1 PrependPath=1
+
+# Set environment variables for python 
+ENV PYTHONDONTWRITEBYTECODE=1
+WORKDIR C:/code
+
+# Install the python packages
+# IMPORTANT: COPY /from/path /to/path will compress the folder into a tar and send it with the docker context during the 
+# build stage. This means any changes to this directory will not be discovered
+COPY requirements.txt /code/
+RUN pip install -r requirements.txt
+
+ENTRYPOINT ["python"]

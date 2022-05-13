@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+
+  jenkins:
+    build: 
+      context: .
+      dockerfile: Dockerfile.jenkins
+    ports:
+      - 8080:8080
+    expose:
+      - "8080"
+    networks:
+      - jenkins-network  
+      
+  sqlite3:
+    image: nouchka/sqlite3:latest
+    volumes:
+      - ./db.sqlite3:/db.sqlite3
+      
+  nginx:
+    build: nginx
+    restart: always
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - "80:80"
+    depends_on:
+      - jenkins
+    networks:
+      - jenkins-network
+      
+networks:
+  jenkins-network:
+    name: jenkins-network
+    
+volumes:
+  media_volume:
+  static_volume:
