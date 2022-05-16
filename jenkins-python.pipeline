@@ -1,5 +1,11 @@
 pipeline {
-	agent { dockerfile true }
+	agent { 
+		dockerfile 
+		{ 
+			filename 	'Dockerfile' 
+			args        '-v /var/run:/test'
+		}
+	}
 	stages {
 		stage('Info') {
 			steps {
